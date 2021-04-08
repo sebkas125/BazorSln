@@ -21,33 +21,22 @@ namespace BazorProject.Server.Controllers
         [HttpGet]
         public async Task<IActionResult> Get([FromQuery] PagingParameters parameters)
         {
-            List<GuestbookEntry> gaestebuchEintraege = new List<GuestbookEntry>();
             if (!System.IO.File.Exists(path))
             {
-                return Ok(PagedList<GuestbookEntry>.ToPagedList(gaestebuchEintraege,
-                    parameters.PageNumber,
-                    parameters.PageSize));
+                return Ok();
             }
 
-            StreamReader sr = new StreamReader(path);
-            System.Xml.Serialization.XmlSerializer reader = new System.Xml.Serialization.XmlSerializer(typeof(List<GuestbookEntry>));
-            gaestebuchEintraege = (List<GuestbookEntry>)reader.Deserialize(sr);
+            List<GuestbookEntry> gaestebuchEintraege = getAll();
             foreach (GuestbookEntry entry in gaestebuchEintraege)
             {
                 entry.Image = getImageAsByteArray(entry.PathToFile);
             }
 
-            sr.Close();
             PagedList<GuestbookEntry> pagedList = PagedList<GuestbookEntry>.ToPagedList(gaestebuchEintraege,
                     parameters.PageNumber,
                     parameters.PageSize);
             Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(pagedList.MetaData));
             return Ok(pagedList);
-        }
-
-        private byte[] getImageAsByteArray(string pathToFile)
-        {
-            return System.IO.File.ReadAllBytes(pathToFile);
         }
 
         [HttpPost("Save")]
@@ -60,6 +49,11 @@ namespace BazorProject.Server.Controllers
             writer.Serialize(wfile, gaestebuchEintraege);
             wfile.Close();
             return Content("");
+        }
+
+        private byte[] getImageAsByteArray(string pathToFile)
+        {
+            return System.IO.File.ReadAllBytes(pathToFile);
         }
 
         private List<GuestbookEntry> getAll()

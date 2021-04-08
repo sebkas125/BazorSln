@@ -14,14 +14,12 @@
     <input @bind="message" />
 </label>
 <label>
-    Lade ein Bild hoch:
+    Lade ein Bild hoch (15 MB max):
     <InputFile id="filePicker" OnChange="@loadFile" />
 </label>
 <button @onclick="createEntry">Hinzufügen</button>
 
 @code {
-    private string name = "";
-    private string message = "";
     IBrowserFile selectedFile;
 
     private async Task loadFile(InputFileChangeEventArgs e)
@@ -30,9 +28,8 @@
         this.StateHasChanged();
     }
 
-    private IList<File> files = new List<File>();
-    private IList<UploadResult> uploadResults = new List<UploadResult>();
-    private int maxAllowedFiles = 3;
+    private string name = "";
+    private string message = "";
     private bool shouldRender;
     protected override bool ShouldRender() => shouldRender;
 
@@ -43,39 +40,16 @@
         var upload = false;
 
         using var content = new MultipartFormDataContent();
+        var fileContent = new StreamContent(selectedFile.OpenReadStream());
 
-
-        if (uploadResults.SingleOrDefault(
-            f => f.FileName == selectedFile.Name) is null)
+        if (selectedFile.Size < maxFileSize)
         {
-            var fileContent = new StreamContent(selectedFile.OpenReadStream());
+            content.Add(
+                content: fileContent,
+                name: "\"files\"",
+                fileName: selectedFile.Name);
 
-            files.Add(
-                new File()
-                {
-                    Name = selectedFile.Name,
-                });
-
-            if (selectedFile.Size < maxFileSize)
-            {
-                content.Add(
-                    content: fileContent,
-                    name: "\"files\"",
-                    fileName: selectedFile.Name);
-
-                upload = true;
-            }
-            else
-            {
-
-                uploadResults.Add(
-                    new UploadResult()
-                    {
-                        FileName = selectedFile.Name,
-                        ErrorCode = 6,
-                        Uploaded = false,
-                    });
-            }
+            upload = true;
         }
 
         if (upload)
@@ -85,7 +59,7 @@
             var newUploadResults = await response.Content
                 .ReadFromJsonAsync<IList<UploadResult>>();
 
-            uploadResults = uploadResults.Concat(newUploadResults).ToList();
+
 
             GuestbookEntry entry = new GuestbookEntry
             {
@@ -100,24 +74,5 @@
         }
 
         shouldRender = true;
-    }
-
-    private static bool FileUpload(IList<UploadResult> uploadResults,
-    string fileName, out UploadResult result)
-    {
-        result = uploadResults.SingleOrDefault(f => f.FileName == fileName);
-
-        if (result is null)
-        {
-            result = new UploadResult();
-            result.ErrorCode = 5;
-        }
-
-        return result.Uploaded;
-    }
-
-    private class File
-    {
-        public string Name { get; set; }
     }
 }
