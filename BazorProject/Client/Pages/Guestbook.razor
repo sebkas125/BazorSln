@@ -1,17 +1,21 @@
 ﻿@page "/guestbook"
 @using BazorProject.Shared
+@using BazorProject.Shared.Paging
+@using BazorProject.Client.Features
+@using System.Text.Json;
+@using System.Text.Json.Serialization;
 @inject HttpClient Http
 
 <h3>Guestbook</h3>
 
-@if (guestbookEntries == null)
+@if (pagingResponse == null)
 {
     <p><em>No entries</em></p>
 }
 else
 {
 
-    @foreach (var entry in guestbookEntries)
+    @foreach (var entry in pagingResponse.Items)
     {
         <div>
             @entry.Name schrieb am @entry.Date.ToString("D") um @entry.Date.ToString("t"):
@@ -19,14 +23,66 @@ else
             <div><img src="data:image;base64,@System.Convert.ToBase64String(@entry.Image)" width="80" height="80" /></div>
         </div>
     }
+    <div class="row">
+        <div class="col">
+            <Pagination MetaData="MetaData" Spread="2" SelectedPage="SelectedPage" />
+        </div>
+    </div>
 }
 
 @code {
     private List<GuestbookEntry> guestbookEntries;
-    private int page = 0;
+    private PagingResponse<GuestbookEntry> pagingResponse;
+    public MetaData MetaData { get; set; } = new MetaData();
+    private PagingParameters parameters = new PagingParameters();
 
     protected override async Task OnInitializedAsync()
     {
-        guestbookEntries = await Http.GetFromJsonAsync<List<GuestbookEntry>>("Guestbook");
+        var response = await Http.GetAsync($"Guestbook?pageNumber=1&pageSize=2");
+        var content = await response.Content.ReadAsStringAsync();
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new ApplicationException(content);
+        }
+
+        pagingResponse = new PagingResponse<GuestbookEntry>
+        {
+            Items = JsonSerializer.Deserialize<List<GuestbookEntry>>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }),
+            MetaData = JsonSerializer.Deserialize<MetaData>(response.Headers.GetValues("X-Pagination").First(), new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
+        };
+
+        MetaData = pagingResponse.MetaData;
+    }
+
+    public async Task<PagingResponse<GuestbookEntry>> GetGuestbookEntries(PagingParameters parameters)
+    {
+
+        var response = await Http.GetAsync($"Guestbook?pageNumber={parameters.PageNumber}&pageSize={parameters.PageSize}");
+        var content = await response.Content.ReadAsStringAsync();
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new ApplicationException(content);
+        }
+
+        pagingResponse = new PagingResponse<GuestbookEntry>
+        {
+            Items = JsonSerializer.Deserialize<List<GuestbookEntry>>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }),
+            MetaData = JsonSerializer.Deserialize<MetaData>(response.Headers.GetValues("X-Pagination").First(), new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
+        };
+
+        MetaData = pagingResponse.MetaData;
+        return pagingResponse;
+    }
+
+    private async Task SelectedPage(int page)
+    {
+        parameters.PageNumber = page;
+        await GetGuestbook();
+    }
+    private async Task GetGuestbook()
+    {
+        var pagingResponse = await GetGuestbookEntries(parameters);
+        guestbookEntries = pagingResponse.Items;
+        MetaData = pagingResponse.MetaData;
     }
 }

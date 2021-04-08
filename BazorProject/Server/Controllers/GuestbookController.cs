@@ -1,6 +1,9 @@
-﻿using BazorProject.Shared;
+﻿using BazorProject.Server.Paging;
+using BazorProject.Shared;
+using BazorProject.Shared.Paging;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.IO;
@@ -16,12 +19,14 @@ namespace BazorProject.Server.Controllers
         string path = $"{Environment.CurrentDirectory}/GaestebuchEintraege.xml";
 
         [HttpGet]
-        public List<GuestbookEntry> Get()
+        public async Task<IActionResult> Get([FromQuery] PagingParameters parameters)
         {
             List<GuestbookEntry> gaestebuchEintraege = new List<GuestbookEntry>();
             if (!System.IO.File.Exists(path))
             {
-                return gaestebuchEintraege;
+                return Ok(PagedList<GuestbookEntry>.ToPagedList(gaestebuchEintraege,
+                    parameters.PageNumber,
+                    parameters.PageSize));
             }
 
             StreamReader sr = new StreamReader(path);
@@ -33,7 +38,11 @@ namespace BazorProject.Server.Controllers
             }
 
             sr.Close();
-            return gaestebuchEintraege;
+            PagedList<GuestbookEntry> pagedList = PagedList<GuestbookEntry>.ToPagedList(gaestebuchEintraege,
+                    parameters.PageNumber,
+                    parameters.PageSize);
+            Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(pagedList.MetaData));
+            return Ok(pagedList);
         }
 
         private byte[] getImageAsByteArray(string pathToFile)
@@ -44,7 +53,7 @@ namespace BazorProject.Server.Controllers
         [HttpPost("Save")]
         public ActionResult<string> Save(GuestbookEntry neuerEintrag)
         {
-            List<GuestbookEntry> gaestebuchEintraege = Get();
+            List<GuestbookEntry> gaestebuchEintraege = getAll();
             gaestebuchEintraege.Add(neuerEintrag);
             System.Xml.Serialization.XmlSerializer writer = new System.Xml.Serialization.XmlSerializer(typeof(List<GuestbookEntry>));
             StreamWriter wfile = new StreamWriter(path);
@@ -52,5 +61,20 @@ namespace BazorProject.Server.Controllers
             wfile.Close();
             return Content("");
         }
-    }
+
+        private List<GuestbookEntry> getAll()
+        {
+            List<GuestbookEntry> gaestebuchEintraege = new List<GuestbookEntry>();
+            if (!System.IO.File.Exists(path))
+            {
+                return gaestebuchEintraege;
+            }
+
+            StreamReader sr = new StreamReader(path);
+            System.Xml.Serialization.XmlSerializer reader = new System.Xml.Serialization.XmlSerializer(typeof(List<GuestbookEntry>));
+            gaestebuchEintraege = (List<GuestbookEntry>)reader.Deserialize(sr);
+            sr.Close();
+            return gaestebuchEintraege;
+        }
+    };
 }
