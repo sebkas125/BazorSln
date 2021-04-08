@@ -10,5 +10,6 @@ namespace BazorProject.Shared
         public string FileName { get; set; }
         public string StoredFileName { get; set; }
         public int ErrorCode { get; set; }
+        public string Path { get; set; }
     }
 }

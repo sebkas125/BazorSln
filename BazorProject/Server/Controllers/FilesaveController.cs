@@ -65,7 +65,7 @@ namespace BlazorProject.Server.Controllers
                     {
                         try
                         {
-                            trustedFileNameForFileStorage = Path.GetRandomFileName();
+                            trustedFileNameForFileStorage = Path.GetRandomFileName().Replace(".", string.Empty) + ".jpg";
                             var path = Path.Combine(env.ContentRootPath, "Files", trustedFileNameForFileStorage);
                             using MemoryStream ms = new();
                             await file.CopyToAsync(ms);
@@ -74,6 +74,7 @@ namespace BlazorProject.Server.Controllers
                                 trustedFileNameForDisplay, path);
                             uploadResult.Uploaded = true;
                             uploadResult.StoredFileName = trustedFileNameForFileStorage;
+                            uploadResult.Path = path;
                         }
                         catch (IOException ex)
                         {

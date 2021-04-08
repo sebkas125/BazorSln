@@ -27,8 +27,18 @@ namespace BazorProject.Server.Controllers
             StreamReader sr = new StreamReader(path);
             System.Xml.Serialization.XmlSerializer reader = new System.Xml.Serialization.XmlSerializer(typeof(List<GuestbookEntry>));
             gaestebuchEintraege = (List<GuestbookEntry>)reader.Deserialize(sr);
+            foreach (GuestbookEntry entry in gaestebuchEintraege)
+            {
+                entry.Image = getImageAsByteArray(entry.PathToFile);
+            }
+
             sr.Close();
             return gaestebuchEintraege;
+        }
+
+        private byte[] getImageAsByteArray(string pathToFile)
+        {
+            return System.IO.File.ReadAllBytes(pathToFile);
         }
 
         [HttpPost("Save")]

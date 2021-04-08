@@ -1,0 +1,32 @@
+﻿@page "/guestbook"
+@using BazorProject.Shared
+@inject HttpClient Http
+
+<h3>Guestbook</h3>
+
+@if (guestbookEntries == null)
+{
+    <p><em>No entries</em></p>
+}
+else
+{
+
+    @foreach (var entry in guestbookEntries)
+    {
+        <div>
+            @entry.Name schrieb am @entry.Date.ToString("D") um @entry.Date.ToString("t"):
+            @entry.Message
+            <div><img src="data:image;base64,@System.Convert.ToBase64String(@entry.Image)" width="80" height="80" /></div>
+        </div>
+    }
+}
+
+@code {
+    private List<GuestbookEntry> guestbookEntries;
+    private int page = 0;
+
+    protected override async Task OnInitializedAsync()
+    {
+        guestbookEntries = await Http.GetFromJsonAsync<List<GuestbookEntry>>("Guestbook");
+    }
+}

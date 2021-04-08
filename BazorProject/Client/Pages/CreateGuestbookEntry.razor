@@ -6,16 +6,21 @@
 
 <h1>Neuer Eintrag</h1>
 <label>
-    Lade ein Bild hoch:
-    <InputFile id="filePicker" OnChange="@loadFile" />
+    Dein Name:
+    <input @bind="name" />
 </label>
 <label>
     Schreibe eine Nachricht:
     <input @bind="message" />
 </label>
+<label>
+    Lade ein Bild hoch:
+    <InputFile id="filePicker" OnChange="@loadFile" />
+</label>
 <button @onclick="createEntry">Hinzufügen</button>
 
 @code {
+    private string name = "";
     private string message = "";
     IBrowserFile selectedFile;
 
@@ -75,22 +80,23 @@
 
         if (upload)
         {
-            /*var response = await Http.PostAsync("/Filesave", content);
+            var response = await Http.PostAsync("/Filesave", content);
 
             var newUploadResults = await response.Content
                 .ReadFromJsonAsync<IList<UploadResult>>();
 
-            uploadResults = uploadResults.Concat(newUploadResults).ToList();*/
+            uploadResults = uploadResults.Concat(newUploadResults).ToList();
 
             GuestbookEntry entry = new GuestbookEntry
             {
+                Name = name,
                 Message = message,
                 Date = DateTime.Now,
-                PathToFile = "a"
+                PathToFile = newUploadResults.FirstOrDefault()?.Path
             };
 
             var stringContent = new StringContent(JsonSerializer.Serialize(entry), System.Text.Encoding.UTF8, "application/json");
-            var response = await Http.PostAsync("Guestbook/Save", stringContent);
+            var response2 = await Http.PostAsync("Guestbook/Save", stringContent);
         }
 
         shouldRender = true;
