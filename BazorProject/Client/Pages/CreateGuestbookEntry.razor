@@ -1,0 +1,117 @@
+﻿@page "/createguestbookentry"
+@using System.IO
+@using BazorProject.Shared
+@using System.Text.Json;
+@inject HttpClient Http
+
+<h1>Neuer Eintrag</h1>
+<label>
+    Lade ein Bild hoch:
+    <InputFile id="filePicker" OnChange="@loadFile" />
+</label>
+<label>
+    Schreibe eine Nachricht:
+    <input @bind="message" />
+</label>
+<button @onclick="createEntry">Hinzufügen</button>
+
+@code {
+    private string message = "";
+    IBrowserFile selectedFile;
+
+    private async Task loadFile(InputFileChangeEventArgs e)
+    {
+        selectedFile = e.GetMultipleFiles().FirstOrDefault();
+        this.StateHasChanged();
+    }
+
+    private IList<File> files = new List<File>();
+    private IList<UploadResult> uploadResults = new List<UploadResult>();
+    private int maxAllowedFiles = 3;
+    private bool shouldRender;
+    protected override bool ShouldRender() => shouldRender;
+
+    private async void createEntry()
+    {
+        shouldRender = false;
+        long maxFileSize = 1024 * 1024 * 15;
+        var upload = false;
+
+        using var content = new MultipartFormDataContent();
+
+
+        if (uploadResults.SingleOrDefault(
+            f => f.FileName == selectedFile.Name) is null)
+        {
+            var fileContent = new StreamContent(selectedFile.OpenReadStream());
+
+            files.Add(
+                new File()
+                {
+                    Name = selectedFile.Name,
+                });
+
+            if (selectedFile.Size < maxFileSize)
+            {
+                content.Add(
+                    content: fileContent,
+                    name: "\"files\"",
+                    fileName: selectedFile.Name);
+
+                upload = true;
+            }
+            else
+            {
+
+                uploadResults.Add(
+                    new UploadResult()
+                    {
+                        FileName = selectedFile.Name,
+                        ErrorCode = 6,
+                        Uploaded = false,
+                    });
+            }
+        }
+
+        if (upload)
+        {
+            /*var response = await Http.PostAsync("/Filesave", content);
+
+            var newUploadResults = await response.Content
+                .ReadFromJsonAsync<IList<UploadResult>>();
+
+            uploadResults = uploadResults.Concat(newUploadResults).ToList();*/
+
+            GuestbookEntry entry = new GuestbookEntry
+            {
+                Message = message,
+                Date = DateTime.Now,
+                PathToFile = "a"
+            };
+
+            var stringContent = new StringContent(JsonSerializer.Serialize(entry), System.Text.Encoding.UTF8, "application/json");
+            var response = await Http.PostAsync("Guestbook/Save", stringContent);
+        }
+
+        shouldRender = true;
+    }
+
+    private static bool FileUpload(IList<UploadResult> uploadResults,
+    string fileName, out UploadResult result)
+    {
+        result = uploadResults.SingleOrDefault(f => f.FileName == fileName);
+
+        if (result is null)
+        {
+            result = new UploadResult();
+            result.ErrorCode = 5;
+        }
+
+        return result.Uploaded;
+    }
+
+    private class File
+    {
+        public string Name { get; set; }
+    }
+}

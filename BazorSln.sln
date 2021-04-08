@@ -3,11 +3,11 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 # Visual Studio Version 16
 VisualStudioVersion = 16.0.30804.86
 MinimumVisualStudioVersion = 10.0.40219.1
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BazorProject.Server", "BazorProject\Server\BazorProject.Server.csproj", "{2E6327E2-557C-4056-91A0-E1E86C583AC5}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BazorProject.Server", "BazorProject\Server\BazorProject.Server.csproj", "{2E6327E2-557C-4056-91A0-E1E86C583AC5}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BazorProject.Client", "BazorProject\Client\BazorProject.Client.csproj", "{815A8A4B-BF96-4782-91B4-74257A1F9D3C}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BazorProject.Client", "BazorProject\Client\BazorProject.Client.csproj", "{815A8A4B-BF96-4782-91B4-74257A1F9D3C}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "BazorProject.Shared", "BazorProject\Shared\BazorProject.Shared.csproj", "{AF2F7DC0-071C-418A-8621-B5EBF3677749}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "BazorProject.Shared", "BazorProject\Shared\BazorProject.Shared.csproj", "{AF2F7DC0-071C-418A-8621-B5EBF3677749}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
