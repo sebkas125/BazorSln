@@ -1,0 +1,11 @@
+﻿#success {
+    color: black;
+    background-color: green;
+    font-size: 20px;
+}
+
+#failure {
+    color: black;
+    background-color: red;
+    font-size: 20px;
+}

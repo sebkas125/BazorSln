@@ -9,15 +9,27 @@
     Dein Name:
     <input @bind="name" />
 </label>
+<br>
 <label>
     Schreibe eine Nachricht:
     <input @bind="message" />
 </label>
+<br>
 <label>
     Lade ein Bild hoch (15 MB max):
+    <br>
     <InputFile id="filePicker" OnChange="@loadFile" />
 </label>
+<br>
 <button @onclick="createEntry">Hinzufügen</button>
+<br>
+<br>
+<label id="success" hidden="@successHidden">
+    Eintrag erfolgreich angelegt!
+</label>
+<label id="failure" hidden="@failureHidden">
+    Eintrag konnte nicht angelegt werden
+</label>
 
 @code {
     IBrowserFile selectedFile;
@@ -30,12 +42,12 @@
 
     private string name = "";
     private string message = "";
-    private bool shouldRender;
-    protected override bool ShouldRender() => shouldRender;
+    private bool successHidden { get; set; } = true;
+    private bool failureHidden { get; set; } = true;
 
-    private async void createEntry()
+    private async Task createEntry()
     {
-        shouldRender = false;
+        failureHidden = true;
         long maxFileSize = 1024 * 1024 * 15;
         var upload = false;
 
@@ -50,6 +62,10 @@
                 fileName: selectedFile.Name);
 
             upload = true;
+        }
+        else
+        {
+            failureHidden = false;
         }
 
         if (upload)
@@ -71,8 +87,17 @@
 
             var stringContent = new StringContent(JsonSerializer.Serialize(entry), System.Text.Encoding.UTF8, "application/json");
             var response2 = await Http.PostAsync("Guestbook/Save", stringContent);
+            successHidden = false;
+            cleanup();
         }
 
-        shouldRender = true;
+        this.StateHasChanged();
+    }
+
+    private void cleanup()
+    {
+        message = "";
+        name = "";
+        selectedFile = null;
     }
 }
