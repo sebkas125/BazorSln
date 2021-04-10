@@ -5,7 +5,9 @@
 @using System.Text.Json;
 @using System.Text.Json.Serialization;
 @inject HttpClient Http
+@inject IJSRuntime jsRuntime
 
+<h1 id="topOfPage" hidden>Top Of Page</h1>
 <h3>Gästebuch</h3>
 
 @if (pagingResponse == null)
@@ -22,7 +24,7 @@ else
             <br>
             @entry.Message
             <br>
-            <div><img src="data:image;base64,@System.Convert.ToBase64String(@entry.Image)" maxwidth="80%" maxheight="80%" height="auto"/></div>
+            <div><img src="data:image;base64,@System.Convert.ToBase64String(@entry.Image)" maxwidth="70%" maxheight="70%" height="auto" /></div>
         </div>
     }
     <div class="row">
@@ -81,10 +83,12 @@ else
         parameters.PageNumber = page;
         await GetGuestbook();
     }
+
     private async Task GetGuestbook()
     {
         var pagingResponse = await GetGuestbookEntries(parameters);
         guestbookEntries = pagingResponse.Items;
         MetaData = pagingResponse.MetaData;
+        await jsRuntime.InvokeVoidAsync("scrollTop");
     }
 }
