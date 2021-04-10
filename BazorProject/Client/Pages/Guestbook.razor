@@ -6,7 +6,7 @@
 @using System.Text.Json.Serialization;
 @inject HttpClient Http
 
-<h3>Guestbook</h3>
+<h3>Gästebuch</h3>
 
 @if (pagingResponse == null)
 {
@@ -19,8 +19,10 @@ else
     {
         <div>
             @entry.Name schrieb am @entry.Date.ToString("D") um @entry.Date.ToString("t"):
+            <br>
             @entry.Message
-            <div><img src="data:image;base64,@System.Convert.ToBase64String(@entry.Image)" width="80" height="80" /></div>
+            <br>
+            <div><img src="data:image;base64,@System.Convert.ToBase64String(@entry.Image)" maxwidth="80%" maxheight="80%" height="auto"/></div>
         </div>
     }
     <div class="row">
@@ -38,7 +40,7 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        var response = await Http.GetAsync($"Guestbook?pageNumber=1&pageSize=2");
+        var response = await Http.GetAsync($"Guestbook?pageNumber=1&pageSize=10");
         var content = await response.Content.ReadAsStringAsync();
         if (!response.IsSuccessStatusCode)
         {

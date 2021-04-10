@@ -27,6 +27,7 @@ namespace BazorProject.Server.Controllers
             }
 
             List<GuestbookEntry> gaestebuchEintraege = getAll();
+            gaestebuchEintraege = gaestebuchEintraege.OrderByDescending(x => x.Date).ToList();
             foreach (GuestbookEntry entry in gaestebuchEintraege)
             {
                 entry.Image = getImageAsByteArray(entry.PathToFile);
