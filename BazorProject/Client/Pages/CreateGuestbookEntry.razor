@@ -28,7 +28,7 @@
     Eintrag erfolgreich angelegt!
 </label>
 <label id="failure" hidden="@failureHidden">
-    Eintrag konnte nicht angelegt werden
+    Name und Nachricht müssen gefüllt sein!
 </label>
 
 @code {
@@ -47,50 +47,51 @@
 
     private async Task createEntry()
     {
-        failureHidden = true;
-        long maxFileSize = 1024 * 1024 * 15;
-        var upload = false;
-
-        using var content = new MultipartFormDataContent();
-        var fileContent = new StreamContent(selectedFile.OpenReadStream());
-
-        if (selectedFile.Size < maxFileSize)
-        {
-            content.Add(
-                content: fileContent,
-                name: "\"files\"",
-                fileName: selectedFile.Name);
-
-            upload = true;
-        }
-        else
+        if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(message))
         {
             failureHidden = false;
+            return;
         }
 
-        if (upload)
+        failureHidden = true;
+        long maxFileSize = 1024 * 1024 * 15;
+        var uploadFile = false;
+
+        using var content = new MultipartFormDataContent();
+
+        if (selectedFile != null && selectedFile.Size < maxFileSize)
+        {
+            var fileContent = new StreamContent(selectedFile.OpenReadStream());
+
+            content.Add(
+            content: fileContent,
+            name: "\"files\"",
+            fileName: selectedFile.Name);
+
+            uploadFile = true;
+        }
+
+        IList<UploadResult> newUploadResults = null;
+        if (uploadFile)
         {
             var response = await Http.PostAsync("/Filesave", content);
 
-            var newUploadResults = await response.Content
+            newUploadResults = await response.Content
                 .ReadFromJsonAsync<IList<UploadResult>>();
-
-
-
-            GuestbookEntry entry = new GuestbookEntry
-            {
-                Name = name,
-                Message = message,
-                Date = DateTime.Now,
-                PathToFile = newUploadResults.FirstOrDefault()?.Path
-            };
-
-            var stringContent = new StringContent(JsonSerializer.Serialize(entry), System.Text.Encoding.UTF8, "application/json");
-            var response2 = await Http.PostAsync("Guestbook/Save", stringContent);
-            successHidden = false;
-            cleanup();
         }
 
+        GuestbookEntry entry = new GuestbookEntry
+        {
+            Name = name,
+            Message = message,
+            Date = DateTime.Now,
+            PathToFile = newUploadResults?.FirstOrDefault()?.Path
+        };
+
+        var stringContent = new StringContent(JsonSerializer.Serialize(entry), System.Text.Encoding.UTF8, "application/json");
+        var response2 = await Http.PostAsync("Guestbook/Save", stringContent);
+        successHidden = false;
+        cleanup();
         this.StateHasChanged();
     }
 

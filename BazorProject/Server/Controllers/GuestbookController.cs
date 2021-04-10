@@ -28,14 +28,14 @@ namespace BazorProject.Server.Controllers
 
             List<GuestbookEntry> gaestebuchEintraege = getAll();
             gaestebuchEintraege = gaestebuchEintraege.OrderByDescending(x => x.Date).ToList();
-            foreach (GuestbookEntry entry in gaestebuchEintraege)
-            {
-                entry.Image = getImageAsByteArray(entry.PathToFile);
-            }
-
             PagedList<GuestbookEntry> pagedList = PagedList<GuestbookEntry>.ToPagedList(gaestebuchEintraege,
                     parameters.PageNumber,
                     parameters.PageSize);
+            foreach (GuestbookEntry entry in pagedList)
+            {
+                entry.Image = string.IsNullOrEmpty(entry.PathToFile) ? null : getImageAsByteArray(entry.PathToFile);
+            }
+
             Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(pagedList.MetaData));
             return Ok(pagedList);
         }

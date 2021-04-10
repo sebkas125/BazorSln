@@ -252,4 +252,14 @@
     <Date>2021-04-09T04:00:46.245+02:00</Date>
     <PathToFile>C:\Users\Sebastian\source\repos\BazorSln\BazorProject\Server\Files\ztdlqlx5bxv.jpg</PathToFile>
   </GuestbookEntry>
+  <GuestbookEntry>
+    <Name>nn</Name>
+    <Message>jjj</Message>
+    <Date>2021-04-11T00:52:57.502+02:00</Date>
+  </GuestbookEntry>
+  <GuestbookEntry>
+    <Name>jj</Name>
+    <Message>bb</Message>
+    <Date>2021-04-11T00:58:24.875+02:00</Date>
+  </GuestbookEntry>
 </ArrayOfGuestbookEntry>

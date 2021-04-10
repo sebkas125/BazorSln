@@ -3,12 +3,12 @@
 @using BazorProject.Shared.Paging
 @using BazorProject.Client.Features
 @using System.Text.Json;
-@using System.Text.Json.Serialization;
 @inject HttpClient Http
 @inject IJSRuntime jsRuntime
 
 <h1 id="topOfPage" hidden>Top Of Page</h1>
 <h3>Gästebuch</h3>
+<br />
 
 @if (pagingResponse == null)
 {
@@ -16,33 +16,44 @@
 }
 else
 {
-
+    <div class="row">
+        <div class="col">
+            <Pagination MetaData="MetaData" Spread="5" SelectedPage="SelectedPage" />
+        </div>
+    </div>
+    <hr />
+    <br />
     @foreach (var entry in pagingResponse.Items)
     {
         <div>
             @entry.Name schrieb am @entry.Date.ToString("D") um @entry.Date.ToString("t"):
             <br>
-            @entry.Message
-            <br>
-            <div><img src="data:image;base64,@System.Convert.ToBase64String(@entry.Image)" maxwidth="70%" maxheight="70%" height="auto" /></div>
+            <div style="font-size:20px;font-weight:bold">@entry.Message</div>
+            @if (@entry.Image != null)
+            {
+                <br>
+                <div><img src="data:image;base64,@System.Convert.ToBase64String(@entry.Image)" maxwidth="50%" maxheight="50%" height="auto" /></div>
+            }
         </div>
+        <br>
+        <hr>
     }
+    <br>
     <div class="row">
         <div class="col">
-            <Pagination MetaData="MetaData" Spread="2" SelectedPage="SelectedPage" />
+            <Pagination MetaData="MetaData" Spread="5" SelectedPage="SelectedPage" />
         </div>
     </div>
 }
 
 @code {
-    private List<GuestbookEntry> guestbookEntries;
     private PagingResponse<GuestbookEntry> pagingResponse;
     public MetaData MetaData { get; set; } = new MetaData();
     private PagingParameters parameters = new PagingParameters();
 
     protected override async Task OnInitializedAsync()
     {
-        var response = await Http.GetAsync($"Guestbook?pageNumber=1&pageSize=10");
+        var response = await Http.GetAsync($"Guestbook?pageNumber=1&pageSize=5");
         var content = await response.Content.ReadAsStringAsync();
         if (!response.IsSuccessStatusCode)
         {
@@ -58,7 +69,7 @@ else
         MetaData = pagingResponse.MetaData;
     }
 
-    public async Task<PagingResponse<GuestbookEntry>> GetGuestbookEntries(PagingParameters parameters)
+    public async Task GetGuestbookEntries(PagingParameters parameters)
     {
 
         var response = await Http.GetAsync($"Guestbook?pageNumber={parameters.PageNumber}&pageSize={parameters.PageSize}");
@@ -75,20 +86,12 @@ else
         };
 
         MetaData = pagingResponse.MetaData;
-        return pagingResponse;
     }
 
     private async Task SelectedPage(int page)
     {
         parameters.PageNumber = page;
-        await GetGuestbook();
-    }
-
-    private async Task GetGuestbook()
-    {
-        var pagingResponse = await GetGuestbookEntries(parameters);
-        guestbookEntries = pagingResponse.Items;
-        MetaData = pagingResponse.MetaData;
+        await GetGuestbookEntries(parameters);
         await jsRuntime.InvokeVoidAsync("scrollTop");
     }
 }
