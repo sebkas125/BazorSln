@@ -32,7 +32,7 @@ else
             @if (@entry.Image != null)
             {
                 <br>
-                <div><img src="data:image;base64,@System.Convert.ToBase64String(@entry.Image)" maxwidth="50%" maxheight="50%" height="auto" /></div>
+                <div><img class="img-fluid" src="data:image;base64,@System.Convert.ToBase64String(@entry.Image)" /></div>
             }
         </div>
         <br>

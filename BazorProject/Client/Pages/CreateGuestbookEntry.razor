@@ -3,6 +3,7 @@
 @using BazorProject.Shared
 @using System.Text.Json;
 @inject HttpClient Http
+@using Microsoft.Extensions.Logging
 
 <h1>Neuer Eintrag</h1>
 <label>
@@ -28,7 +29,7 @@
     Eintrag erfolgreich angelegt!
 </label>
 <label id="failure" hidden="@failureHidden">
-    Name und Nachricht müssen gefüllt sein!
+    @failureMessage
 </label>
 
 @code {
@@ -44,55 +45,66 @@
     private string message = "";
     private bool successHidden { get; set; } = true;
     private bool failureHidden { get; set; } = true;
+    private string failureMessage { get; set; } = "";
 
     private async Task createEntry()
     {
-        if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(message))
+        try
+        {
+
+            if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(message))
+            {
+                failureHidden = false;
+                failureMessage = "Name und Nachricht müssen gesetzt sein!";
+                return;
+            }
+
+            failureHidden = true;
+            long maxFileSize = 1024 * 1024 * 15;
+            var uploadFile = false;
+
+            using var content = new MultipartFormDataContent();
+
+            if (selectedFile != null && selectedFile.Size < maxFileSize)
+            {
+                var fileContent = new StreamContent(selectedFile.OpenReadStream(maxFileSize));
+
+                content.Add(
+                content: fileContent,
+                name: "\"files\"",
+                fileName: selectedFile.Name);
+
+                uploadFile = true;
+            }
+
+            IList<UploadResult> newUploadResults = null;
+            if (uploadFile)
+            {
+                var response = await Http.PostAsync("/Filesave", content);
+
+                newUploadResults = await response.Content
+                    .ReadFromJsonAsync<IList<UploadResult>>();
+            }
+
+            GuestbookEntry entry = new GuestbookEntry
+            {
+                Name = name,
+                Message = message,
+                Date = DateTime.Now,
+                PathToFile = newUploadResults?.FirstOrDefault()?.Path
+            };
+
+            var stringContent = new StringContent(JsonSerializer.Serialize(entry), System.Text.Encoding.UTF8, "application/json");
+            var response2 = await Http.PostAsync("Guestbook/Save", stringContent);
+            successHidden = false;
+            cleanup();
+            this.StateHasChanged();
+        }
+        catch (Exception e)
         {
             failureHidden = false;
-            return;
+            failureMessage = e.Message;
         }
-
-        failureHidden = true;
-        long maxFileSize = 1024 * 1024 * 15;
-        var uploadFile = false;
-
-        using var content = new MultipartFormDataContent();
-
-        if (selectedFile != null && selectedFile.Size < maxFileSize)
-        {
-            var fileContent = new StreamContent(selectedFile.OpenReadStream());
-
-            content.Add(
-            content: fileContent,
-            name: "\"files\"",
-            fileName: selectedFile.Name);
-
-            uploadFile = true;
-        }
-
-        IList<UploadResult> newUploadResults = null;
-        if (uploadFile)
-        {
-            var response = await Http.PostAsync("/Filesave", content);
-
-            newUploadResults = await response.Content
-                .ReadFromJsonAsync<IList<UploadResult>>();
-        }
-
-        GuestbookEntry entry = new GuestbookEntry
-        {
-            Name = name,
-            Message = message,
-            Date = DateTime.Now,
-            PathToFile = newUploadResults?.FirstOrDefault()?.Path
-        };
-
-        var stringContent = new StringContent(JsonSerializer.Serialize(entry), System.Text.Encoding.UTF8, "application/json");
-        var response2 = await Http.PostAsync("Guestbook/Save", stringContent);
-        successHidden = false;
-        cleanup();
-        this.StateHasChanged();
     }
 
     private void cleanup()
