@@ -73,7 +73,7 @@ namespace BlazorProject.Server.Controllers
                             using MemoryStream ms = new();
                             await file.CopyToAsync(ms);
                             await System.IO.File.WriteAllBytesAsync(path, ms.ToArray());
-                            if (file.Length > 1024 * 1024)
+                            if (file.Length > MAX_PHOTO_SIZE)
                             {
                                 path = await resizeImage(path);
                             }
