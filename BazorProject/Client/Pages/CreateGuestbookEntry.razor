@@ -4,6 +4,7 @@
 @using System.Text.Json;
 @inject HttpClient Http
 @using Microsoft.Extensions.Logging
+@inject IJSRuntime jsRuntime
 
 <h1>Neuer Eintrag</h1>
 <label>
@@ -17,14 +18,17 @@
 </label>
 <br>
 <label>
-    Lade ein Bild hoch (15 MB max):
+    Lade ein Bild hoch (20 MB max):
     <br>
     <InputFile id="filePicker" OnChange="@loadFile" />
 </label>
 <br>
-<button @onclick="createEntry">Hinzufügen</button>
+<button id="hinzufuegenButton" @onclick="createEntry">Hinzufügen</button>
 <br>
 <br>
+<label id="wait" hidden="@waitHidden">
+    Eintrag wird angelegt. Bitte warten...
+</label>
 <label id="success" hidden="@successHidden">
     Eintrag erfolgreich angelegt!
 </label>
@@ -38,17 +42,24 @@
     private async Task loadFile(InputFileChangeEventArgs e)
     {
         selectedFile = e.GetMultipleFiles().FirstOrDefault();
+        successHidden = true;
+        failureHidden = true;
         this.StateHasChanged();
     }
 
     private string name = "";
     private string message = "";
+    private bool waitHidden { get; set; } = true;
     private bool successHidden { get; set; } = true;
     private bool failureHidden { get; set; } = true;
     private string failureMessage { get; set; } = "";
 
     private async Task createEntry()
     {
+        waitHidden = false;
+        await jsRuntime.InvokeVoidAsync("disable", "hinzufuegenButton");
+        await jsRuntime.InvokeVoidAsync("disable", "filePicker");
+        this.StateHasChanged();
         try
         {
 
@@ -60,7 +71,7 @@
             }
 
             failureHidden = true;
-            long maxFileSize = 1024 * 1024 * 15;
+            long maxFileSize = 1024 * 1024 * 20;
             var uploadFile = false;
 
             using var content = new MultipartFormDataContent();
@@ -86,6 +97,11 @@
                     .ReadFromJsonAsync<IList<UploadResult>>();
             }
 
+            if (newUploadResults?.FirstOrDefault().ErrorCode > 0)
+            {
+                throw new Exception($"Upload fehlgeschlagen. Code {newUploadResults?.FirstOrDefault().ErrorCode}");
+            }
+
             GuestbookEntry entry = new GuestbookEntry
             {
                 Name = name,
@@ -98,12 +114,18 @@
             var response2 = await Http.PostAsync("Guestbook/Save", stringContent);
             successHidden = false;
             cleanup();
-            this.StateHasChanged();
         }
         catch (Exception e)
         {
             failureHidden = false;
             failureMessage = e.Message;
+        }
+        finally
+        {
+            waitHidden = true;
+            await jsRuntime.InvokeVoidAsync("enable", "hinzufuegenButton");
+            await jsRuntime.InvokeVoidAsync("enable", "filePicker");
+            this.StateHasChanged();
         }
     }
 

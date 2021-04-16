@@ -12,7 +12,7 @@
 
 @if (pagingResponse == null)
 {
-    <p><em>No entries</em></p>
+    <p><em>Einträge werden geladen...</em></p>
 }
 else
 {
@@ -32,7 +32,7 @@ else
             @if (@entry.Image != null)
             {
                 <br>
-                <div><img class="img-fluid" src="data:image;base64,@System.Convert.ToBase64String(@entry.Image)" /></div>
+                <div style="overflow:hidden"><img class="img-fluid" style="max-width:80%" src="data:image;base64,@System.Convert.ToBase64String(@entry.Image)" /></div>
             }
         </div>
         <br>
@@ -90,6 +90,7 @@ else
 
     private async Task SelectedPage(int page)
     {
+        pagingResponse = null;
         parameters.PageNumber = page;
         await GetGuestbookEntries(parameters);
         await jsRuntime.InvokeVoidAsync("scrollTop");

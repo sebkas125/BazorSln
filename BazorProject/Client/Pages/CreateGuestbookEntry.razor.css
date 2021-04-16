@@ -1,4 +1,10 @@
-﻿#success {
+﻿#wait {
+    color: black;
+    background-color: white;
+    font-size: 20px;
+}
+
+#success {
     color: black;
     background-color: green;
     font-size: 20px;
