@@ -3,18 +3,20 @@
 @using BazorProject.Shared
 @using System.Text.Json;
 @inject HttpClient Http
-@using Microsoft.Extensions.Logging
 @inject IJSRuntime jsRuntime
 
 <h1>Neuer Eintrag</h1>
+
 <label>
     Dein Name:
-    <input @bind="name" />
+    <br>
+    <input id="name" @bind="name" />
 </label>
 <br>
 <label>
     Schreibe eine Nachricht:
-    <input @bind="message" />
+    <br>
+    <textarea id="message" cols="24" rows="4" maxlength="250" @bind="message" />
 </label>
 <br>
 <label>
@@ -25,7 +27,6 @@
 <br>
 <button id="hinzufuegenButton" @onclick="createEntry">Hinzufügen</button>
 <br>
-<br>
 <label id="wait" hidden="@waitHidden">
     Eintrag wird angelegt. Bitte warten...
 </label>
@@ -35,6 +36,9 @@
 <label id="failure" hidden="@failureHidden">
     @failureMessage
 </label>
+<br>
+<div class="spin" hidden="@waitHidden"></div>
+<br>
 
 @code {
     IBrowserFile selectedFile;
@@ -59,6 +63,8 @@
         waitHidden = false;
         await jsRuntime.InvokeVoidAsync("disable", "hinzufuegenButton");
         await jsRuntime.InvokeVoidAsync("disable", "filePicker");
+        await jsRuntime.InvokeVoidAsync("disable", "message");
+        await jsRuntime.InvokeVoidAsync("disable", "name");
         this.StateHasChanged();
         try
         {
@@ -125,6 +131,8 @@
             waitHidden = true;
             await jsRuntime.InvokeVoidAsync("enable", "hinzufuegenButton");
             await jsRuntime.InvokeVoidAsync("enable", "filePicker");
+            await jsRuntime.InvokeVoidAsync("enable", "message");
+            await jsRuntime.InvokeVoidAsync("enable", "name");
             this.StateHasChanged();
         }
     }
