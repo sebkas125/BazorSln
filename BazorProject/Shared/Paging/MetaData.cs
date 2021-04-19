@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace BazorProject.Shared.Paging
+﻿namespace BazorProject.Shared.Paging
 {
     public class MetaData
     {

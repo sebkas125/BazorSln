@@ -1,8 +1,4 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace BazorProject.Shared
+﻿namespace BazorProject.Shared
 {
     public class UploadResult
     {

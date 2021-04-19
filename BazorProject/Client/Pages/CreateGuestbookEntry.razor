@@ -65,6 +65,7 @@
         await jsRuntime.InvokeVoidAsync("disable", "filePicker");
         await jsRuntime.InvokeVoidAsync("disable", "message");
         await jsRuntime.InvokeVoidAsync("disable", "name");
+        await jsRuntime.InvokeVoidAsync("disable", "nav-item-1");
         this.StateHasChanged();
         try
         {
@@ -133,6 +134,7 @@
             await jsRuntime.InvokeVoidAsync("enable", "filePicker");
             await jsRuntime.InvokeVoidAsync("enable", "message");
             await jsRuntime.InvokeVoidAsync("enable", "name");
+            await jsRuntime.InvokeVoidAsync("enable", "nav-item-1");
             this.StateHasChanged();
         }
     }

@@ -16,11 +16,16 @@
     <div class="spin"></div>
     <br>
 }
+else if (pagingResponse.Items == null)
+{
+    <p><em>Es gibt noch keine Einträge im Gästebuch.</em></p>
+    <br>
+}
 else
 {
     <div class="row">
         <div class="col">
-            <Pagination MetaData="MetaData" Spread="5" SelectedPage="SelectedPage" />
+            <Pagination MetaData="pagingResponse.MetaData" Spread="5" SelectedPage="SelectedPage" />
         </div>
     </div>
     <hr />
@@ -43,14 +48,13 @@ else
     <br>
     <div class="row">
         <div class="col">
-            <Pagination MetaData="MetaData" Spread="5" SelectedPage="SelectedPage" />
+            <Pagination MetaData="pagingResponse.MetaData" Spread="5" SelectedPage="SelectedPage" />
         </div>
     </div>
 }
 
 @code {
     private PagingResponse<GuestbookEntry> pagingResponse;
-    public MetaData MetaData { get; set; } = new MetaData();
     private PagingParameters parameters = new PagingParameters();
 
     protected override async Task OnInitializedAsync()
@@ -62,13 +66,16 @@ else
             throw new ApplicationException(content);
         }
 
-        pagingResponse = new PagingResponse<GuestbookEntry>
-        {
-            Items = JsonSerializer.Deserialize<List<GuestbookEntry>>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }),
-            MetaData = JsonSerializer.Deserialize<MetaData>(response.Headers.GetValues("X-Pagination").First(), new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
-        };
+        pagingResponse = new PagingResponse<GuestbookEntry>();
 
-        MetaData = pagingResponse.MetaData;
+        if (string.IsNullOrEmpty(content))
+        {
+
+            return;
+        }
+
+        pagingResponse.Items = JsonSerializer.Deserialize<List<GuestbookEntry>>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        pagingResponse.MetaData = JsonSerializer.Deserialize<MetaData>(response.Headers.GetValues("X-Pagination").First(), new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
     }
 
     public async Task GetGuestbookEntries(PagingParameters parameters)
@@ -86,8 +93,6 @@ else
             Items = JsonSerializer.Deserialize<List<GuestbookEntry>>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }),
             MetaData = JsonSerializer.Deserialize<MetaData>(response.Headers.GetValues("X-Pagination").First(), new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
         };
-
-        MetaData = pagingResponse.MetaData;
     }
 
     private async Task SelectedPage(int page)

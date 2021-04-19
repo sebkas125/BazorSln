@@ -1,10 +1,7 @@
 ﻿using BazorProject.Client.Features;
 using BazorProject.Shared.Paging;
 using Microsoft.AspNetCore.Components;
-using Microsoft.JSInterop;
-using System;
 using System.Collections.Generic;
-using System.Linq;
 using System.Threading.Tasks;
 
 namespace BazorProject.Client.Pages
@@ -13,8 +10,10 @@ namespace BazorProject.Client.Pages
     {
         [Parameter]
         public MetaData MetaData { get; set; }
+
         [Parameter]
         public int Spread { get; set; }
+
         [Parameter]
         public EventCallback<int> SelectedPage { get; set; }
 

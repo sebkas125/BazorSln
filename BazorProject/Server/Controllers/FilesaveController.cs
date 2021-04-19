@@ -1,5 +1,4 @@
-﻿
-using BazorProject.Shared;
+﻿using BazorProject.Shared;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -9,7 +8,6 @@ using System.Collections.Generic;
 using System.Drawing;
 using System.Drawing.Imaging;
 using System.IO;
-using System.Linq;
 using System.Net;
 using System.Threading.Tasks;
 
@@ -21,7 +19,7 @@ namespace BlazorProject.Server.Controllers
     {
         private readonly IWebHostEnvironment env;
         private readonly ILogger<FilesaveController> logger;
-        const long MAX_PHOTO_SIZE = 1024 * 512;
+        private const long MAX_PHOTO_SIZE = 1024 * 512;
 
         public FilesaveController(IWebHostEnvironment env,
             ILogger<FilesaveController> logger)
@@ -143,7 +141,6 @@ namespace BlazorProject.Server.Controllers
                 //Console.WriteLine(resizedSize + "(" + sizeDifference + " " + (lastSizeDifference - sizeDifference) + ")");
                 //lastSizeDifference = sizeDifference;
                 quality--;
-
             } while (resizedSize > MAX_PHOTO_SIZE);
 
             resizedPhotoStream.Seek(0, SeekOrigin.Begin);

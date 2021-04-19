@@ -1,7 +1,6 @@
 ﻿using BazorProject.Server.Paging;
 using BazorProject.Shared;
 using BazorProject.Shared.Paging;
-using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Newtonsoft.Json;
 using System;
@@ -16,7 +15,7 @@ namespace BazorProject.Server.Controllers
     [Route("[controller]")]
     public class GuestbookController : ControllerBase
     {
-        string path = $"{Environment.CurrentDirectory}/GaestebuchEintraege.xml";
+        private string path = $"{Environment.CurrentDirectory}/GaestebuchEintraege.xml";
 
         [HttpGet]
         public async Task<IActionResult> Get([FromQuery] PagingParameters parameters)

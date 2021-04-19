@@ -1,14 +1,11 @@
-﻿using System;
-using System.Collections.Generic;
-using System.Text;
-
-namespace BazorProject.Shared.Paging
+﻿namespace BazorProject.Shared.Paging
 {
     public class PagingParameters
     {
-        const int maxPageSize = 50;
+        private const int maxPageSize = 50;
         public int PageNumber { get; set; } = 1;
         private int _pageSize = 5;
+
         public int PageSize
         {
             get
