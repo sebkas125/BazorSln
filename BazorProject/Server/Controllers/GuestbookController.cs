@@ -32,7 +32,7 @@ namespace BazorProject.Server.Controllers
                     parameters.PageSize);
             foreach (GuestbookEntry entry in pagedList)
             {
-                entry.Image = string.IsNullOrEmpty(entry.PathToFile) ? null : getImageAsByteArray(entry.PathToFile);
+                entry.Image = string.IsNullOrEmpty(entry.PathToFile) || !System.IO.File.Exists(entry.PathToFile) ? null : getImageAsByteArray(entry.PathToFile);
             }
 
             Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(pagedList.MetaData));

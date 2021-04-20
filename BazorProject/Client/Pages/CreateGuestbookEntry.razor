@@ -39,6 +39,11 @@
     <i class="fa fa-times-circle"></i>
     @failureMessage
 </div>
+<br />
+<div class="isa_info animated fadeOut" hidden="@pictureInfoHidden">
+    <i class="fa fa-info-circle"></i>
+    Das Foto wird möglicherweise verzögert im Gästebuch angezeigt.
+</div>
 
 @code {
     IBrowserFile selectedFile;
@@ -56,29 +61,23 @@
     private bool waitHidden { get; set; } = true;
     private bool successHidden { get; set; } = true;
     private bool failureHidden { get; set; } = true;
+    private bool pictureInfoHidden { get; set; } = true;
     private string failureMessage { get; set; } = "";
 
     private async Task createEntry()
     {
-        waitHidden = false;
-        successHidden = true;
-        await jsRuntime.InvokeVoidAsync("disable", "hinzufuegenButton");
-        await jsRuntime.InvokeVoidAsync("disable", "filePicker");
-        await jsRuntime.InvokeVoidAsync("disable", "message");
-        await jsRuntime.InvokeVoidAsync("disable", "name");
-        await jsRuntime.InvokeVoidAsync("disableNavMenu");
+        booleanHandler(true, true, false, true);
+        disablePage(true);
         this.StateHasChanged();
         try
         {
             if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(message))
             {
-                waitHidden = true;
-                failureHidden = false;
+                booleanHandler(true, false, true, true);
                 failureMessage = "Name und Nachricht müssen gesetzt sein!";
                 return;
             }
 
-            failureHidden = true;
             long maxFileSize = 1024 * 1024 * 20;
             var uploadFile = false;
 
@@ -120,23 +119,47 @@
 
             var stringContent = new StringContent(JsonSerializer.Serialize(entry), System.Text.Encoding.UTF8, "application/json");
             var response2 = await Http.PostAsync("Guestbook/Save", stringContent);
-            successHidden = false;
+            booleanHandler(false, true, true, !uploadFile);
             cleanup();
         }
         catch (Exception e)
         {
-            failureHidden = false;
+            booleanHandler(true, false, true, true);
             failureMessage = e.Message;
         }
         finally
         {
-            waitHidden = true;
+            booleanHandler(successHidden, failureHidden, true, pictureInfoHidden);
+            disablePage(false);
+            this.StateHasChanged();
+        }
+    }
+
+    private void booleanHandler(bool success, bool failure, bool wait, bool pictureInfo)
+    {
+        successHidden = success;
+        failureHidden = failure;
+        waitHidden = wait;
+        pictureInfoHidden = pictureInfo;
+    }
+
+    private async void disablePage(bool disable)
+    {
+        if (disable)
+        {
+            await jsRuntime.InvokeVoidAsync("disable", "hinzufuegenButton");
+            await jsRuntime.InvokeVoidAsync("disable", "filePicker");
+            await jsRuntime.InvokeVoidAsync("disable", "message");
+            await jsRuntime.InvokeVoidAsync("disable", "name");
+            await jsRuntime.InvokeVoidAsync("disableNavMenu");
+        }
+        else
+        {
             await jsRuntime.InvokeVoidAsync("enable", "hinzufuegenButton");
             await jsRuntime.InvokeVoidAsync("enable", "filePicker");
             await jsRuntime.InvokeVoidAsync("enable", "message");
             await jsRuntime.InvokeVoidAsync("enable", "name");
             await jsRuntime.InvokeVoidAsync("enableNavMenu");
-            this.StateHasChanged();
         }
     }
 

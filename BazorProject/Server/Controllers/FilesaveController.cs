@@ -73,7 +73,10 @@ namespace BlazorProject.Server.Controllers
                             await System.IO.File.WriteAllBytesAsync(path, ms.ToArray());
                             if (file.Length > MAX_PHOTO_SIZE)
                             {
-                                path = await resizeImage(path);
+                                string pathToFile = path;
+                                string pathToResizedFile = Path.Combine(Path.GetDirectoryName(path), "Small", $"{Path.GetFileNameWithoutExtension(path)}_smaller.jpg");
+                                Task.Run(() => resizeImage(pathToFile, pathToResizedFile));
+                                path = pathToResizedFile;
                             }
 
                             logger.LogInformation("{FileName} saved at {Path}",
@@ -106,17 +109,14 @@ namespace BlazorProject.Server.Controllers
             return new CreatedResult(resourcePath, uploadResults);
         }
 
-        private async Task<string> resizeImage(string path)
+        private void resizeImage(string path, string pathToResizedFile)
         {
             Image image = Image.FromFile(path);
             MemoryStream stream = DownscaleImage(image);
-            path = Path.Combine(Path.GetDirectoryName(path), "Small", $"{Path.GetFileNameWithoutExtension(path)}_smaller.jpg");
-            using (var smallFile = System.IO.File.Create(path))
+            using (var smallFile = System.IO.File.Create(pathToResizedFile))
             {
                 stream.CopyTo(smallFile);
             }
-
-            return path;
         }
 
         private MemoryStream DownscaleImage(Image photo)
