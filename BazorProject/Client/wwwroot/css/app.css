@@ -75,6 +75,21 @@ a, .btn-link {
     margin: 25px 25px 25px 25px;
 }
 
+.infospin::before {
+    animation: 1.5s linear infinite spinner;
+    animation-play-state: inherit;
+    border: solid 5px #cfd0d1;
+    border-bottom-color: #1c87c9;
+    border-radius: 50%;
+    content: "";
+    height: 30px;
+    width: 30px;
+    position: absolute;
+    transform: translate3d(-50%, -50%, 0);
+    will-change: transform;
+    margin: 20px 25px 0px 0px;
+}
+
 .disabled {
     pointer-events: none;
     opacity: 0.4;
@@ -85,6 +100,7 @@ a, .btn-link {
     padding: 12px;
     padding-right: 40px;
     display: inline-block;
+    border-radius: 7px;
 }
 
 .isa_info {

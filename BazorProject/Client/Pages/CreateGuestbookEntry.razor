@@ -28,7 +28,7 @@
 <button id="hinzufuegenButton" @onclick="createEntry">Hinzufügen</button>
 <br>
 <div class="isa_info" hidden="@waitHidden">
-    <i class="fa fa-info-circle"></i>
+    <i class="infospin"></i>
     Eintrag wird angelegt. Bitte warten...
 </div>
 <div class="isa_success animated fadeOut" hidden="@successHidden">
@@ -39,9 +39,6 @@
     <i class="fa fa-times-circle"></i>
     @failureMessage
 </div>
-<br>
-<div class="spin" hidden="@waitHidden"></div>
-<br>
 
 @code {
     IBrowserFile selectedFile;
@@ -75,7 +72,7 @@
         {
             if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(message))
             {
-
+                waitHidden = true;
                 failureHidden = false;
                 failureMessage = "Name und Nachricht müssen gesetzt sein!";
                 return;
