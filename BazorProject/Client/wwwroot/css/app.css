@@ -73,3 +73,8 @@ a, .btn-link {
     will-change: transform;
     margin: 25px 25px 25px 25px;
 }
+
+.disabled {
+    pointer-events: none;
+    opacity: 0.4;
+}
