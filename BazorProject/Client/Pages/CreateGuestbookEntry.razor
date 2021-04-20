@@ -27,15 +27,18 @@
 <br>
 <button id="hinzufuegenButton" @onclick="createEntry">Hinzufügen</button>
 <br>
-<label id="wait" hidden="@waitHidden">
+<div class="isa_info" hidden="@waitHidden">
+    <i class="fa fa-info-circle"></i>
     Eintrag wird angelegt. Bitte warten...
-</label>
-<label id="success" hidden="@successHidden">
+</div>
+<div class="isa_success animated fadeOut" hidden="@successHidden">
+    <i class="fa fa-check"></i>
     Eintrag erfolgreich angelegt!
-</label>
-<label id="failure" hidden="@failureHidden">
+</div>
+<div class="isa_error" hidden="@failureHidden">
+    <i class="fa fa-times-circle"></i>
     @failureMessage
-</label>
+</div>
 <br>
 <div class="spin" hidden="@waitHidden"></div>
 <br>
@@ -61,6 +64,7 @@
     private async Task createEntry()
     {
         waitHidden = false;
+        successHidden = true;
         await jsRuntime.InvokeVoidAsync("disable", "hinzufuegenButton");
         await jsRuntime.InvokeVoidAsync("disable", "filePicker");
         await jsRuntime.InvokeVoidAsync("disable", "message");
@@ -69,9 +73,9 @@
         this.StateHasChanged();
         try
         {
-
             if (string.IsNullOrEmpty(name) || string.IsNullOrEmpty(message))
             {
+
                 failureHidden = false;
                 failureMessage = "Name und Nachricht müssen gesetzt sein!";
                 return;

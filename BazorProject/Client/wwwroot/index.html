@@ -23,14 +23,14 @@
         };
         window.disableNavMenu = () => {
             $('#navMenuTop').addClass('disabled');
-            $('#navMenuId').each(function () {
+            $('#navMenuElements').each(function () {
                 var li = $(this).find('li');
                 li.addClass('disabled');
             });
         };
         window.enableNavMenu = () => {
             $('#navMenuTop').removeClass('disabled');
-            $('#navMenuId').each(function () {
+            $('#navMenuElements').each(function () {
                 var li = $(this).find('li');
                 li.removeClass('disabled');
             });
