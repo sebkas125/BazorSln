@@ -3,6 +3,7 @@
 @using BazorProject.Shared.Paging
 @using BazorProject.Client.Features
 @using System.Text.Json;
+@using Microsoft.AspNetCore.WebUtilities;
 @inject HttpClient Http
 @inject IJSRuntime jsRuntime
 
@@ -59,8 +60,14 @@ else
 
     protected override async Task OnInitializedAsync()
     {
-        var response = await Http.GetAsync($"Guestbook?pageNumber=1&pageSize=5");
-        var content = await response.Content.ReadAsStringAsync();
+        Dictionary<string, string> queryStringParam = new Dictionary<string, string>
+        {
+            ["pageNumber"] = "1",
+            ["pageSize"] = "5"
+        };
+
+        HttpResponseMessage response = await Http.GetAsync(QueryHelpers.AddQueryString("Guestbook", queryStringParam));
+        string content = await response.Content.ReadAsStringAsync();
         if (!response.IsSuccessStatusCode)
         {
             throw new ApplicationException(content);
@@ -80,9 +87,14 @@ else
 
     public async Task GetGuestbookEntries(PagingParameters parameters)
     {
+        Dictionary<string, string> queryStringParam = new Dictionary<string, string>
+        {
+            ["pageNumber"] = parameters.PageNumber.ToString(),
+            ["pageSize"] = parameters.PageSize.ToString()
+        };
 
-        var response = await Http.GetAsync($"Guestbook?pageNumber={parameters.PageNumber}&pageSize={parameters.PageSize}");
-        var content = await response.Content.ReadAsStringAsync();
+        HttpResponseMessage response = await Http.GetAsync(QueryHelpers.AddQueryString("Guestbook", queryStringParam));
+        string content = await response.Content.ReadAsStringAsync();
         if (!response.IsSuccessStatusCode)
         {
             throw new ApplicationException(content);
