@@ -114,7 +114,7 @@
                 Name = name,
                 Message = message,
                 Date = DateTime.Now,
-                PathToFile = newUploadResults?.FirstOrDefault()?.Path
+                Filename = newUploadResults?.FirstOrDefault()?.StoredFileName
             };
 
             var stringContent = new StringContent(JsonSerializer.Serialize(entry), System.Text.Encoding.UTF8, "application/json");

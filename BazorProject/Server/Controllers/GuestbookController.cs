@@ -15,12 +15,13 @@ namespace BazorProject.Server.Controllers
     [Route("[controller]")]
     public class GuestbookController : ControllerBase
     {
-        private string path = $"{Environment.CurrentDirectory}/GaestebuchEintraege.xml";
+        private string xmlpath = $"{Environment.CurrentDirectory}/GaestebuchEintraege.xml";
+        private string filePathToDownscaled = Path.Combine(Environment.CurrentDirectory, "Files", "Small");
 
         [HttpGet]
         public async Task<IActionResult> Get([FromQuery] PagingParameters parameters)
         {
-            if (!System.IO.File.Exists(path))
+            if (!System.IO.File.Exists(xmlpath))
             {
                 return Ok();
             }
@@ -32,7 +33,7 @@ namespace BazorProject.Server.Controllers
                     parameters.PageSize);
             foreach (GuestbookEntry entry in pagedList)
             {
-                entry.Image = string.IsNullOrEmpty(entry.PathToFile) || !System.IO.File.Exists(entry.PathToFile) ? null : getImageAsByteArray(entry.PathToFile);
+                entry.Image = string.IsNullOrEmpty(entry.Filename) || !System.IO.File.Exists(Path.Combine(filePathToDownscaled, entry.Filename)) ? null : getImageAsByteArray(Path.Combine(filePathToDownscaled, entry.Filename));
             }
 
             Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(pagedList.MetaData));
@@ -45,7 +46,7 @@ namespace BazorProject.Server.Controllers
             List<GuestbookEntry> gaestebuchEintraege = getAll();
             gaestebuchEintraege.Add(neuerEintrag);
             System.Xml.Serialization.XmlSerializer writer = new System.Xml.Serialization.XmlSerializer(typeof(List<GuestbookEntry>));
-            StreamWriter wfile = new StreamWriter(path);
+            StreamWriter wfile = new StreamWriter(xmlpath);
             writer.Serialize(wfile, gaestebuchEintraege);
             wfile.Close();
             return Content("");
@@ -59,12 +60,12 @@ namespace BazorProject.Server.Controllers
         private List<GuestbookEntry> getAll()
         {
             List<GuestbookEntry> gaestebuchEintraege = new List<GuestbookEntry>();
-            if (!System.IO.File.Exists(path))
+            if (!System.IO.File.Exists(xmlpath))
             {
                 return gaestebuchEintraege;
             }
 
-            StreamReader sr = new StreamReader(path);
+            StreamReader sr = new StreamReader(xmlpath);
             System.Xml.Serialization.XmlSerializer reader = new System.Xml.Serialization.XmlSerializer(typeof(List<GuestbookEntry>));
             gaestebuchEintraege = (List<GuestbookEntry>)reader.Deserialize(sr);
             sr.Close();
