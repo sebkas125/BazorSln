@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.HttpOverrides;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
+using System.Threading.Tasks;
 
 namespace BazorProject.Server
 {
@@ -44,6 +45,17 @@ namespace BazorProject.Server
             {
                 app.UseExceptionHandler("/Error");
             }
+
+            app.Use(async (context, nextMiddleware) =>
+            {
+                context.Response.OnStarting(() =>
+                {
+                    context.Response.Headers.Remove("Cache-Control");
+                    context.Response.Headers.Add("Cache-Control", "no-store");
+                    return Task.FromResult(0);
+                });
+                await nextMiddleware();
+            });
 
             app.UseForwardedHeaders(new ForwardedHeadersOptions
             {
