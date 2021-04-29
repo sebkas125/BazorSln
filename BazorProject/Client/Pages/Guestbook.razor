@@ -4,6 +4,7 @@
 @using BazorProject.Client.Features
 @using System.Text.Json;
 @using Microsoft.AspNetCore.WebUtilities;
+@using System.Net
 @inject HttpClient Http
 @inject IJSRuntime jsRuntime
 
@@ -41,6 +42,11 @@ else
             {
                 <br>
                 <div style="overflow:hidden"><img class="img-fluid" style="max-width:500px" src="data:image;base64,@System.Convert.ToBase64String(@entry.Image)" /></div>
+            }
+            @if (@entry.Filename != null)
+            {
+                <br>
+                <div><a href="Filedownload/?filename=@entry.Filename" target="_blank">Download</a></div>
             }
         </div>
         <br>

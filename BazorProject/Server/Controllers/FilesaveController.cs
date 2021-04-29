@@ -73,17 +73,14 @@ namespace BlazorProject.Server.Controllers
                             await System.IO.File.WriteAllBytesAsync(path, ms.ToArray());
                             if (file.Length > MAX_PHOTO_SIZE)
                             {
-                                string pathToFile = path;
-                                string pathToResizedFile = Path.Combine(Path.GetDirectoryName(path), "Small", $"{Path.GetFileNameWithoutExtension(path)}_smaller.jpg");
-                                Task.Run(() => resizeImage(pathToFile, pathToResizedFile));
-                                path = pathToResizedFile;
+                                string pathToResizedFile = Path.Combine(Path.GetDirectoryName(path), "Small", Path.GetFileName(path));
+                                Task.Run(() => resizeImage(path, pathToResizedFile));
                             }
 
                             logger.LogInformation("{FileName} saved at {Path}",
                                 trustedFileNameForDisplay, path);
                             uploadResult.Uploaded = true;
                             uploadResult.StoredFileName = trustedFileNameForFileStorage;
-                            uploadResult.Path = path;
                         }
                         catch (IOException ex)
                         {
@@ -112,14 +109,14 @@ namespace BlazorProject.Server.Controllers
         private void resizeImage(string path, string pathToResizedFile)
         {
             Image image = Image.FromFile(path);
-            MemoryStream stream = DownscaleImage(image);
+            MemoryStream stream = downscaleImage(image);
             using (var smallFile = System.IO.File.Create(pathToResizedFile))
             {
                 stream.CopyTo(smallFile);
             }
         }
 
-        private MemoryStream DownscaleImage(Image photo)
+        private MemoryStream downscaleImage(Image photo)
         {
             MemoryStream resizedPhotoStream = new MemoryStream();
 
@@ -132,7 +129,7 @@ namespace BlazorProject.Server.Controllers
 
                 EncoderParameters eps = new EncoderParameters(1);
                 eps.Param[0] = new EncoderParameter(System.Drawing.Imaging.Encoder.Quality, (long)quality);
-                ImageCodecInfo ici = GetEncoderInfo("image/jpeg");
+                ImageCodecInfo ici = getEncoderInfo("image/jpeg");
 
                 photo.Save(resizedPhotoStream, ici, eps);
                 resizedSize = resizedPhotoStream.Length;
@@ -147,7 +144,7 @@ namespace BlazorProject.Server.Controllers
             return resizedPhotoStream;
         }
 
-        private ImageCodecInfo GetEncoderInfo(String mimeType)
+        private ImageCodecInfo getEncoderInfo(String mimeType)
         {
             int j;
             ImageCodecInfo[] encoders;

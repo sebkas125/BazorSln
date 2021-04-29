@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="utf-8"?>
+<ArrayOfGuestbookEntry xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <GuestbookEntry>
+    <Name>wergwerh</Name>
+    <Message>wegwge</Message>
+    <Date>2021-04-29T15:38:33.344+02:00</Date>
+  </GuestbookEntry>
+  <GuestbookEntry>
+    <Name>drbe</Name>
+    <Message>erb</Message>
+    <Date>2021-04-29T15:41:05.531+02:00</Date>
+    <Filename>fhnd3nhndj3.jpg</Filename>
+  </GuestbookEntry>
+</ArrayOfGuestbookEntry>
