@@ -1,0 +1,156 @@
+﻿@page "/posts/{PageName}"
+@using BazorProject.Shared
+@using BazorProject.Shared.Paging
+@using BazorProject.Client.Features
+@using System.Text.Json;
+@using Microsoft.AspNetCore.WebUtilities;
+@using System.Net
+@inject HttpClient Http
+@inject IJSRuntime jsRuntime
+
+<h1 id="topOfPage" hidden>Top Of Page</h1>
+<h3>@PageName</h3>
+<br />
+
+@if (pagingResponse == null)
+{
+    <p><em>Einträge werden geladen...</em></p>
+    <div class="spin"></div>
+    <br>
+}
+else if (pagingResponse.Items == null || pagingResponse.Items.Count() == 0)
+{
+    <p><em>Es gibt noch keine Einträge im @PageName.</em></p>
+    <br>
+}
+else
+{
+    <div class="row">
+        <div class="col">
+            <Pagination MetaData="pagingResponse.MetaData" Spread="5" SelectedPage="SelectedPage" />
+        </div>
+    </div>
+    <hr />
+    <br />
+    @foreach (var entry in pagingResponse.Items)
+    {
+        <div>
+            @entry.Name schrieb am @entry.Date.ToString("D") um @entry.Date.ToString("t"):
+            <br>
+            <div style="font-size:20px;font-weight:bold">@entry.Message</div>
+            @if (@entry.Image != null)
+            {
+                <br>
+                <div style="overflow:hidden; max-width:500px"><img class="img-fluid" style="max-width:100%; height:auto" src="data:image;base64,@System.Convert.ToBase64String(@entry.Image)" /></div>
+                <br>
+                <button class="buttonAsLink" @onclick="@(() => Flip(@entry.Filename))">
+                    Flip
+                </button>
+            }
+            @if (@entry.Filename != null)
+            {
+                @if (@entry.Image != null)
+                {
+                    <div class="tab"><a href="File/Download/?filename=@entry.Filename" target="_blank">Download</a></div>
+                }
+                else
+                {
+                    <div><a href="File/Download/?filename=@entry.Filename" target="_blank">Download</a></div>
+                }
+
+            }
+        </div>
+        <br>
+        <hr>
+    }
+    <br>
+    <div class="row">
+        <div class="col">
+            <Pagination MetaData="pagingResponse.MetaData" Spread="5" SelectedPage="SelectedPage" />
+        </div>
+    </div>
+}
+
+@code {
+    [Parameter]
+    public string PageName { get; set; }
+    private PostType postType;
+    private PagingResponse<Post> pagingResponse;
+    private PagingParameters parameters = new PagingParameters();
+
+    protected override async Task OnParametersSetAsync()
+    {
+        pagingResponse = null;
+        await OnInitializedAsync();
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        postType = PageName == "Gästebuch" ? PostType.Guestbook : PostType.Blog;
+
+        Dictionary<string, string> queryStringParam = new Dictionary<string, string>
+        {
+            ["pageNumber"] = "1",
+            ["pageSize"] = "5",
+            ["PostType"] = postType.ToString()
+        };
+
+        HttpResponseMessage response = await Http.GetAsync(QueryHelpers.AddQueryString("Post", queryStringParam));
+        string content = await response.Content.ReadAsStringAsync();
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new ApplicationException(content);
+        }
+
+        pagingResponse = new PagingResponse<Post>();
+
+        if (string.IsNullOrEmpty(content))
+        {
+
+            return;
+        }
+
+        pagingResponse.Items = JsonSerializer.Deserialize<List<Post>>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+        pagingResponse.MetaData = JsonSerializer.Deserialize<MetaData>(response.Headers.GetValues("X-Pagination").First(), new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+    }
+
+    public async Task GetPosts(PagingParameters parameters)
+    {
+        Dictionary<string, string> queryStringParam = new Dictionary<string, string>
+        {
+            ["pageNumber"] = parameters.PageNumber.ToString(),
+            ["pageSize"] = parameters.PageSize.ToString(),
+            ["PostType"] = postType.ToString()
+        };
+
+        HttpResponseMessage response = await Http.GetAsync(QueryHelpers.AddQueryString("Post", queryStringParam));
+        string content = await response.Content.ReadAsStringAsync();
+        if (!response.IsSuccessStatusCode)
+        {
+            throw new ApplicationException(content);
+        }
+
+        pagingResponse = new PagingResponse<Post>
+        {
+            Items = JsonSerializer.Deserialize<List<Post>>(content, new JsonSerializerOptions { PropertyNameCaseInsensitive = true }),
+            MetaData = JsonSerializer.Deserialize<MetaData>(response.Headers.GetValues("X-Pagination").First(), new JsonSerializerOptions { PropertyNameCaseInsensitive = true })
+        };
+    }
+
+    private async Task SelectedPage(int page)
+    {
+        pagingResponse = null;
+        parameters.PageNumber = page;
+        await GetPosts(parameters);
+        await jsRuntime.InvokeVoidAsync("scrollTop");
+    }
+
+    private async void Flip(string filename)
+    {
+        pagingResponse = null;
+        var stringContent = new StringContent(JsonSerializer.Serialize(filename), System.Text.Encoding.UTF8, "application/json");
+        await Http.PostAsync("Filedownload/Flip", stringContent);
+        await GetPosts(parameters);
+        this.StateHasChanged();
+    }
+}

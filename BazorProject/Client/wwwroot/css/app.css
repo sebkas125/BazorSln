@@ -162,3 +162,19 @@ a, .btn-link {
     -webkit-animation-name: fadeOut;
     animation-name: fadeOut;
 }
+
+.buttonAsLink {
+    background: none !important;
+    border: none;
+    padding: 0 !important;
+    /*optional*/
+    font-family: arial, sans-serif;
+    /*input has OS specific font-family*/
+    color: #069;
+    cursor: pointer;
+}
+
+.tab {
+    display: inline-block;
+    margin-left: 40px;
+}
