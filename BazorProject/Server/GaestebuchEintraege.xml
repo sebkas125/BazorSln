@@ -1,14 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
-<ArrayOfGuestbookEntry xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
-  <GuestbookEntry>
-    <Name>wergwerh</Name>
-    <Message>wegwge</Message>
-    <Date>2021-04-29T15:38:33.344+02:00</Date>
-  </GuestbookEntry>
-  <GuestbookEntry>
-    <Name>drbe</Name>
-    <Message>erb</Message>
-    <Date>2021-04-29T15:41:05.531+02:00</Date>
-    <Filename>fhnd3nhndj3.jpg</Filename>
-  </GuestbookEntry>
-</ArrayOfGuestbookEntry>
+<ArrayOfPost xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:xsd="http://www.w3.org/2001/XMLSchema">
+  <Post>
+    <Name>s</Name>
+    <Message>dfg</Message>
+    <Date>2021-05-02T17:17:15.718+02:00</Date>
+    <Filename>vxuvpqw3pza.jpg</Filename>
+    <PostType>Guestbook</PostType>
+  </Post>
+  <Post>
+    <Name>dfn</Name>
+    <Message>dfn</Message>
+    <Date>2021-05-02T17:28:56.467+02:00</Date>
+    <Filename>a3w0frelrft.jpg</Filename>
+    <PostType>Guestbook</PostType>
+  </Post>
+  <Post>
+    <Name>nnnn</Name>
+    <Message>,n</Message>
+    <Date>2021-05-03T22:10:23.877+02:00</Date>
+    <Filename>ykh0vjfzqrk.jpg</Filename>
+    <PostType>Guestbook</PostType>
+  </Post>
+  <Post>
+    <Name>neu</Name>
+    <Message>neublog</Message>
+    <Date>2021-05-03T22:11:11.746+02:00</Date>
+    <Filename>tcjcpjhigtk.jpg</Filename>
+    <PostType>Blog</PostType>
+  </Post>
+  <Post>
+    <Name>nn</Name>
+    <Message>nn</Message>
+    <Date>2021-05-03T22:18:36.636+02:00</Date>
+    <Filename>s4j3pfaq40b.jpg</Filename>
+    <PostType>Blog</PostType>
+  </Post>
+</ArrayOfPost>
