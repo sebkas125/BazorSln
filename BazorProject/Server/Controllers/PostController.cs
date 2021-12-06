@@ -7,6 +7,7 @@ using System;
 using System.Collections.Generic;
 using System.IO;
 using System.Linq;
+using System.Threading;
 using System.Threading.Tasks;
 
 namespace BazorProject.Server.Controllers
@@ -16,10 +17,11 @@ namespace BazorProject.Server.Controllers
     public class PostController : ControllerBase
     {
         private string xmlpath = $"{Environment.CurrentDirectory}/GaestebuchEintraege.xml";
+        private string filePath = Path.Combine(Environment.CurrentDirectory, "Files");
         private string filePathToDownscaled = Path.Combine(Environment.CurrentDirectory, "Files", "Small");
 
         [HttpGet]
-        public async Task<IActionResult> Get([FromQuery] PagingParameters parameters)
+        public IActionResult Get([FromQuery] PagingParameters parameters)
         {
             if (!System.IO.File.Exists(xmlpath))
             {
@@ -31,10 +33,14 @@ namespace BazorProject.Server.Controllers
             PagedList<Post> pagedList = PagedList<Post>.ToPagedList(posts,
                     parameters.PageNumber,
                     parameters.PageSize);
-            foreach (Post entry in pagedList)
+
+            Parallel.ForEach(pagedList, entry =>
             {
-                entry.Image = string.IsNullOrEmpty(entry.Filename) || !System.IO.File.Exists(Path.Combine(filePathToDownscaled, entry.Filename)) ? null : getImageAsByteArray(Path.Combine(filePathToDownscaled, entry.Filename));
-            }
+                if (!string.IsNullOrEmpty(entry.Filename))
+                {
+                entry.Image = System.IO.File.Exists(Path.Combine(filePathToDownscaled, entry.Filename)) ? getImageAsByteArray(Path.Combine(filePathToDownscaled, entry.Filename)) : getImageAsByteArray(Path.Combine(filePath, entry.Filename));
+        }
+            });
 
             Response.Headers.Add("X-Pagination", JsonConvert.SerializeObject(pagedList.MetaData));
             return Ok(pagedList);
@@ -71,5 +77,4 @@ namespace BazorProject.Server.Controllers
             sr.Close();
             return gaestebuchEintraege;
         }
-    };
-}
+    }}
